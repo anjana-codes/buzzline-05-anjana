@@ -344,3 +344,58 @@ See the [LICENSE](LICENSE.txt) file for more.
 - Ruff by Astral Software (Linter + Formatter)
 - **SQLite Viewer by Florian Klampfer**
 - WSL by Microsoft (on Windows Machines)
+
+## P5: Database Integration with Streaming Pipelines: Custom consumer(project_consumer_anjana.py)
+
+### What it does?
+    
+    project_consumer_anjana.py is a custom consumer that continuously reads new JSON messages from a local file (project_live.json). For each message, it extracts the message text, category, sentiment, keyword mentioned, and message length fields, then stores them in a persistent SQLite database (anjana_keyword.sqlite). It also tracks and updates keyword mention counts for ongoing analysis.
+  
+### Insight focus
+
+    This consumer focuses on tracking keyword mention frequency, sentiment score, message length, and message category in real time. These insights allow analysis of keyword trends, sentiment patterns, and message categorization over time.
+
+### What is calculated and stored for each message?
+
+For each message, the consumer extracts and stores:
+
+- Message text — original message content
+- Author — who sent the message
+- Timestamp — when the message was sent
+- Category — classification of the message
+- Sentiment score — numeric measure of sentiment
+- Keyword mentioned — tracked keywords
+- Message length — number of characters in the message
+Additionally, keyword mention counts are tracked and updated dynamically in a separate table.
+
+### Why it is interesting?
+
+This allows real-time tracking of conversation trends, sentiment shifts, and keyword popularity, which can be useful for analytics, reporting, or further data-driven insights.
+
+### How to run?
+
+This will take two terminals:
+
+1. One to run the producer which writes messages using various emitters. 
+2. Another to run each consumer. 
+
+- Run Producer: 
+
+Windows:
+
+```shell
+.\.venv\Scripts\Activate.ps1
+py -m producers.producer_case
+``` 
+
+- Run Consumer:
+Windows:
+
+```shell
+.\.venv\Scripts\Activate.ps1
+py -m consumers.project_consumer_anjana
+```
+
+### Data Storage 
+
+Database : SQLite (data/anjana_keyword.sqlite)
