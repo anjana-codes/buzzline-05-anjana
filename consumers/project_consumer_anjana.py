@@ -64,28 +64,33 @@ def store_message(message, db_file):
     conn.close()
 
 
-def read_one_message(data_file):
-    with open(data_file, 'r') as f:
-        for line in f:
-            if line.strip():
-                return json.loads(line.strip())
-    return None
+def read_new_messages(data_file, last_pos):
+    with open(data_file, 'r', encoding="utf-8") as f:
+        f.seek(last_pos)  # Go to where we last stopped
+        lines = f.readlines()
+        new_pos = f.tell()  # Remember new position for next loop
+    return lines, new_pos
 
 
 def main():
     init_db(DB_FILE)
-    print(f"Starting continuous loop. Reading from {DATA_FILE} and storing in {DB_FILE}")
+    print(f"Starting consumer_anjana.py — reading from {DATA_FILE} into {DB_FILE}")
+
+    last_pos = 0
     try:
         while True:
-            message = read_one_message(DATA_FILE)
-            if message:
-                store_message(message, DB_FILE)
-                print("Stored message and updated keyword counts.")
-            else:
-                print("No new message found.")
-            time.sleep(2)  # Delay to prevent busy-looping
+            lines, last_pos = read_new_messages(DATA_FILE, last_pos)
+
+            if not lines:
+                print("No new messages. Waiting...")
+            for line in lines:
+                if line.strip():
+                    message = json.loads(line.strip())
+                    store_message(message, DB_FILE)
+                    print(f"Stored new message: {message.get('message')}")
+            time.sleep(2)  # Delay before checking again
     except KeyboardInterrupt:
-        print("\nProcess interrupted by user. Exiting...")
+        print("\nConsumer stopped by user.")
 
 
 if __name__ == "__main__":
